@@ -43,6 +43,18 @@ export default function Home({BACKEND_URL}) {
               <input id="partnered"/ type="checkbox" ${partnered?"checked":""}>
               <label for="partnered">Partnered</label>
             </div>
+            <div class="row">
+              <div class="col-6">
+                <button class="btn btn-success">
+                  Save
+                </button>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-secondary">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       `);
@@ -50,21 +62,25 @@ export default function Home({BACKEND_URL}) {
     }
 
     const addLocatiionMarker = (location) => {
+      const coordinates = {
+        lat: location.lat,
+        lng: location.lng
+      }
       const locatioinMarker = new google.maps.Marker({
-        position: {
-          lat: location.lat,
-          lng: location.lng
-        },
+        position: coordinates,
         map:map,
         icon: {
           url: location.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg",
           scaledSize: new google.maps.Size(50, 50)
         },
       });
+      
+      locatioinMarker.location = location;
 
       //when an existing location gets clicked
       google.maps.event.addDomListener(locatioinMarker, "click", function() {
-          moveInfoWindow(location);
+          moveInfoWindow(coordinates);
+          editLocation(coordinates, location.name, location.address, location.phone_number, location.partnered, location.sale?.id);
       });
     }
 
