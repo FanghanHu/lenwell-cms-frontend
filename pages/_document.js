@@ -14,7 +14,7 @@ class MyDocument extends Document {
             <meta name="lenwell cms" content="App" />
             <script
                 async
-                src={`https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAP_API}&callback=initMap&libraries=places`}
+                src={`https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAP_API}&libraries=places`}
             >
             </script>
         </Head>
