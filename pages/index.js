@@ -1,33 +1,79 @@
 import styles from '../styles/Home.module.css'
 import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
 import { useEffect } from 'react';
+import axios from 'axios';
 
-export default function Home() {
+export default function Home({BACKEND_URL}) {
 
   useEffect(() => {
     const map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 29.718557455282742, lng: -95.51367567423155},
       zoom: 15,
     });
+    const placeService = new google.maps.places.PlacesService(map);
 
-    const testLocations = [
-      {
-        lat: 29.7130437, 
-        lng: -95.5143379
-      },
-      {
-        lat: 29.7170437, 
-        lng: -95.5114379
-      },
-      {
-        lat: 29.7180437, 
-        lng: -95.5755379
-      },
-      {
-        lat: 29.7145437, 
-        lng: -95.5113679
+    const editLocationWindow = new google.maps.InfoWindow({
+      map: map,
+      content: "hi"
+    })
+
+    const moveInfoWindow = (location) => {
+      editLocationWindow.close();
+          editLocationWindow.setPosition(location);
+          editLocationWindow.open(map);
+    }
+
+    const editLocation = (location, name, address, phoneNumber, partnered, salesId) => {
+      editLocationWindow.setContent(`
+        <div class="p-3">
+          <form>
+            <div>
+              <label for="name">Name: </label>
+              <input id="name" type="text" value="${name??""}" />
+            </div>
+            <div>
+              <label for="address">Address: </label>
+              <input id="address" type="text" value="${address??""}" />
+            </div>
+            <div>
+              <label for="phone-number">Phone Number: </label>
+              <input id="phone-number" type="text" value="${phoneNumber??""}" />
+            </div>
+            <div>
+              <input id="partnered"/ type="checkbox" ${partnered?"checked":""}>
+              <label for="partnered">Partnered</label>
+            </div>
+          </form>
+        </div>
+      `);
+      moveInfoWindow(location);
+    }
+
+    const addLocatiionMarker = (location) => {
+      const locatioinMarker = new google.maps.Marker({
+        position: {
+          lat: location.lat,
+          lng: location.lng
+        },
+        map:map,
+        icon: {
+          url: location.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg",
+          scaledSize: new google.maps.Size(50, 50)
+        },
+      });
+
+      //when an existing location gets clicked
+      google.maps.event.addDomListener(locatioinMarker, "click", function() {
+          moveInfoWindow(location);
+      });
+    }
+
+    //get locations from server
+    axios.get(`${BACKEND_URL}/locations`).then(({data}) => {
+      for(const location of data) {
+        addLocatiionMarker(location);
       }
-    ]
+    })
 
     //add marker for company location
     const marker = new google.maps.Marker({
@@ -46,39 +92,22 @@ export default function Home() {
       console.log(marker);
     });
 
-    //add test markers
-    for(const position of testLocations) {
-      const testMarker = new google.maps.Marker({
-        position: position,
-        map:map,
-        icon: {
-          url: "/assets/icon/green-marker.svg",
-          scaledSize: new google.maps.Size(50, 50)
-        },
-      })
-    }
-
     map.addListener("click", (event) => {
-      console.log("click event", event);
-      console.log("you clicked " + event.latLng);
       if(event.placeId) {
-        console.log("you clicked on place: " + event.placeId);
+        //clicking a POI, stop default fetching  of location detail.
         event.stop();
-        infoWindow.close();
-        const jsx = document.getElementById("info-window-content");
-        console.log(jsx);
-        infoWindow.setContent(
-          jsx
-        );
-        infoWindow.setPosition(event.latLng);
-        infoWindow.open(map);
+
+        //get place detail from google
+        placeService.getDetails({
+          placeId: event.placeId,
+        }, ({formatted_address, formatted_phone_number, name}) => {
+          //TODO: add correct salesId
+          editLocation(event.latLng, name, formatted_address, formatted_phone_number, false, 0);
+        })
+      } else {
+        //clicking on an empty location
       }
     });
-
-    
-
-
-
   }, []);
 
   return (
@@ -90,4 +119,13 @@ export default function Home() {
         </div>
     </div>
   )
+}
+
+export async function getStaticProps(context) {
+  return {
+    props: {
+      // GOOGLE_MAP_API: process.env.GOOGLE_MAP_API,
+      BACKEND_URL: process.env.BACKEND_URL
+    }
+  }
 }
