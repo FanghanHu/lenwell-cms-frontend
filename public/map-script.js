@@ -9,9 +9,35 @@ window.onload = () => {
       });
     const placeService = new google.maps.places.PlacesService(map);
 
+    window.saveLocation = () => {
+        let location = {...(infoWindow._location)};
+        location.name = $("#loc-name").val();
+        location.address = $("#loc-address").val();
+        location.phone_number = $("#loc-phone").val();
+        location.partnered = $("#loc-partnered").prop('checked');
+        //TODO: update sales
+
+        if(location.id) {
+            //update an existing location
+        } else {
+            //creating a new location
+            $.post(`${window.BACKEND_URL}/locations`, {
+                ...location
+            }, (res) => {
+                let newLoc = res;
+                addLocatiionMarker(newLoc);
+                infoWindow.close();
+            })
+        }
+    }
+    
+
+
     //change InfoWindow content and move it.
     const updateInfoWindow = (location) => {
         // console.log("updating to new location:", location);
+        //attach latest location with the infoWindow so buttons can access it.
+        infoWindow._location = location;
         infoWindow.setContent(
             `
                 <div>
@@ -42,7 +68,7 @@ window.onload = () => {
                     </div>
                     
                     <div class="d-flex justify-content-end my-2">
-                    <button class="btn btn-success mx-1">Save</button>
+                    <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
                     <button class="btn btn-secondary mx-1">Cancel</button>
                     </div>
                 </div>
