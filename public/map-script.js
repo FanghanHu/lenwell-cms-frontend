@@ -19,16 +19,33 @@ window.onload = () => {
 
         if(location.id) {
             //update an existing location
+            for(const key in location) {
+                if(location[key] === null) {
+                    location[key] = undefined;
+                } 
+            }
+            $.ajax({
+                url: `${window.BACKEND_URL}/locations/${location.id}`,
+                data: location,
+                type: "PUT",
+                success: (res) => {
+                    infoWindow._location.name = res.name;
+                    infoWindow._location.address = res.address;
+                    infoWindow._location.phone_number = res.phone_number;
+                    infoWindow._location.partnered = res.partnered;
+                }
+            });
         } else {
             //creating a new location
-            $.post(`${window.BACKEND_URL}/locations`, {
-                ...location
-            }, (res) => {
+            $.post(`${window.BACKEND_URL}/locations`,
+                location, 
+            (res) => {
                 let newLoc = res;
                 addLocatiionMarker(newLoc);
-                infoWindow.close();
             })
         }
+
+        infoWindow.close();
     }
     
 
@@ -69,7 +86,7 @@ window.onload = () => {
                     
                     <div class="d-flex justify-content-end my-2">
                     <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
-                    <button class="btn btn-secondary mx-1">Cancel</button>
+                    ${location.id!==undefined?'<button class="btn btn-danger mx-1">Delete</button>':""}
                     </div>
                 </div>
             `
