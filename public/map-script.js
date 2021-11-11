@@ -35,6 +35,10 @@ window.onload = () => {
                     infoWindow._location.address = res.address;
                     infoWindow._location.phone_number = res.phone_number;
                     infoWindow._location.partnered = res.partnered;
+                    infoWindow._marker.setIcon({
+                        url: res.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg",
+                        scaledSize: new google.maps.Size(50, 50)
+                      });
                 }
             });
         } else {
