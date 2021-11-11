@@ -9,6 +9,7 @@ window.onload = () => {
       });
     const placeService = new google.maps.places.PlacesService(map);
 
+    //when the save button is pressed
     window.saveLocation = () => {
         let location = {...(infoWindow._location)};
         location.name = $("#loc-name").val();
@@ -47,7 +48,20 @@ window.onload = () => {
 
         infoWindow.close();
     }
-    
+
+    //when the delete button is pressed
+    window.deleteLocation = () => {
+        if(infoWindow?._location?.id) {
+            $.ajax({
+                url: `${window.BACKEND_URL}/locations/${infoWindow?._location?.id}`,
+                type: "DELETE",
+                success: (res) => {
+                    infoWindow._marker?.setMap(null);
+                    infoWindow.close();
+                }
+            });
+        }
+    }
 
 
     //change InfoWindow content and move it.
@@ -83,10 +97,9 @@ window.onload = () => {
                             </div>
                         </div>
                     </div>
-                    
                     <div class="d-flex justify-content-end my-2">
-                    <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
-                    ${location.id!==undefined?'<button class="btn btn-danger mx-1">Delete</button>':""}
+                        <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
+                        ${location.id!==undefined?'<button class="btn btn-danger mx-1" onclick="deleteLocation()">Delete</button>':""}
                     </div>
                 </div>
             `
@@ -100,7 +113,7 @@ window.onload = () => {
 
     //add a marker to the map
     const addLocatiionMarker = (location) => {
-        const locatioinMarker = new google.maps.Marker({
+        const locationMarker = new google.maps.Marker({
           position: {
             lat: location.lat,
             lng: location.lng
@@ -112,10 +125,11 @@ window.onload = () => {
           },
         });
         
-        locatioinMarker.location = location;
+        locationMarker.location = location;
   
         //when an existing location gets clicked
-        google.maps.event.addDomListener(locatioinMarker, "click", function() {
+        google.maps.event.addDomListener(locationMarker, "click", function() {
+            infoWindow._marker = locationMarker;
             updateInfoWindow(location);
         });
     }
