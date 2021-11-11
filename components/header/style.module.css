@@ -1,0 +1,11 @@
+.container{
+    min-height: 2em;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo{
+    height: 2em;
+}

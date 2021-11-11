@@ -1,4 +1,5 @@
 .map {
     width: 100VW;
-    height: 100VH;
+    height: 100%;
+    flex-grow: 1;
 }
