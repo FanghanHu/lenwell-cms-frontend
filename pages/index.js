@@ -3,8 +3,11 @@ import ReactDOM from 'react-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import GoogleMap from '../components/google-map';
+import { withSession } from '../middlewares/session';
 
-export default function Home() {
+export default function Home(props) {
+  console.log(props.user);
+
   useEffect(() => {
     //expose backend url to window object
     window.BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -15,3 +18,12 @@ export default function Home() {
     </div>
   )
 }
+
+export const getServerSideProps = withSession((context) => {
+  const { req } = context;
+  return {
+    props: {
+      user: req.session.get('user') || null,
+    }
+  }
+})

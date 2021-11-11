@@ -1,4 +1,5 @@
 window.onload = () => {
+    console.log("initializing map");
     //initialize map
     const map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 29.718557455282742, lng: -95.51367567423155},
