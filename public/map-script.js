@@ -1,5 +1,56 @@
+
+async function showChat(location) {
+    const $chatContent = $("#chat-content");
+    $chatContent.empty();
+    if (location) {
+        $("#chat-title").text(location.name);
+        //show messages in this chat
+        for (const message of location.messages) {
+            const messageText = document.createElement("div");
+            //query for sender name
+            const sender = await $.get(`${window.BACKEND_URL}/users/${message.sender}`);
+            //parse chat markdown into html
+            messageText.innerHTML = marked.parse(message.text);
+            //make all images in message Text the same width
+            const $messageText = $(messageText);
+            $messageText.find("img").css("width", "100%");
+            $messageText.find("img").css("border-radius", "5px");
+            $messageText.addClass(`text-white rounded p-3`);
+            if(user.id === sender.id) {
+                $messageText.css("background", "linear-gradient(to bottom left, #64EC7E, #35B35F)")
+            } else {
+                $messageText.css("background", "linear-gradient(to bottom left, #646AEC, #3550B3)")
+            }
+            const messageTime = new Date(message.created_at);
+            const $chatBubble = $(`
+                <div class="m-2 w-75 ${user.id === sender.id?"float-right":"float-left"}">
+                    <div class="d-flex justify-content-between">
+                        <div class="font-weight-bold">${sender.name}:</div>
+                        <div class="text-mute">${messageTime.toLocaleDateString() + " " + messageTime.toLocaleTimeString()}</div>
+                    </div>
+                </div>
+            `)
+            $chatBubble.append(messageText);
+            $chatContent.append($chatBubble);
+        }
+    } else {
+        $("#chat-title").text(chat);
+    }
+
+
+    $("#chat").css("left", "0");
+}
+
+function hideChat() {
+    $("#chat").css("left", "-100%");
+}
+
 window.onload = () => {
     console.log("initializing map");
+    marked.setOptions({
+        breaks: true
+    });
+
     //initialize map
     const map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 29.718557455282742, lng: -95.51367567423155 },
@@ -110,12 +161,12 @@ window.onload = () => {
                             </div>
                         </div>
                     </div>
-                    ${isOwner ? 
-                        `<div class="d-flex justify-content-end my-2">
+                    ${isOwner ?
+                `<div class="d-flex justify-content-end my-2">
                             <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
                             ${location.id !== undefined ? '<button class="btn btn-danger mx-1" onclick="deleteLocation()">Delete</button>' : ""}
                         </div>`
-                    : ""}
+                : ""}
                 </div>
             `
         );
@@ -146,11 +197,13 @@ window.onload = () => {
         google.maps.event.addDomListener(locationMarker, "click", function () {
             infoWindow._marker = locationMarker;
             updateInfoWindow(location);
+            showChat(location);
         });
     }
 
     //when the map is clicked
     map.addListener("click", (event) => {
+        hideChat();
         //TODO: use mouse up and mouse down event to prevent misclicks.
         if (event.placeId) {
             //clicking a POI, stop default fetching  of location detail.
@@ -185,6 +238,15 @@ window.onload = () => {
             });
         }
     });
+
+    //send text message
+    $("#send-chat-btn").on('click', () => {
+        console.log("send chat");
+    })
+
+    $("#send-image-btn").on('click', () => {
+        console.log("send image");
+    })
 
     //load locations from server
     $.get(`${window.BACKEND_URL}/locations`).then((data) => {
