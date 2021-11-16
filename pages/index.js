@@ -8,16 +8,17 @@ import { toast, ToastContainer } from 'react-nextjs-toast'
 export default function Home({user}) {
   const router = useRouter();
 
-  if(!user) {
-    router.push('/login');
-    return <div>You need to login first</div>
-  }
-
   useEffect(() => {
     //expose some variables to the browser
     window.BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
     window.user = user;
     window.toast = toast;
+
+    if(!user) {
+      router.push('/login');
+      return <div>You need to login first</div>
+    }
+    
   }, []);
   return (
     <div style={{

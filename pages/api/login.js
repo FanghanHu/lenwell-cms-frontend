@@ -16,8 +16,17 @@ export default nc()
             }
         );
 
+        //console.log("user", result.data);
+
         const user = {
-            ...(result.data.user),
+            id: result.data.user.id,
+            username: result.data.user.username,
+            email: result.data.user.email,
+            provider: result.data.user.provider,
+            confirmed: result.data.user.confirmed,
+            blocked: result.data.user.blocked,
+            role: result.data.user.role,
+            name: result.data.user.name,
             strapiToken: result.data.jwt,
             };
 
@@ -32,6 +41,7 @@ export default nc()
       await req.session.save();
       res.json(user);
     } catch (error) {
+      console.error(error);
       const { response: fetchResponse } = error;
       if (fetchResponse) {
         return res.status(fetchResponse?.status || 500).json(error.response?.data);
