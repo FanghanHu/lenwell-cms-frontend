@@ -35,6 +35,11 @@ async function showChat() {
     const $chatContent = $("#chat-content");
     $chatContent.empty();
     if (window._infoWindow._location) {
+
+        /**
+         * The location here is stored into the window object when the location is clicked
+         * it is the *ACTIVE* location which the user just interacted with.
+         */
         $("#chat-title").text(window._infoWindow._location.name);
         //show messages in this chat
         for (const message of window._infoWindow._location.messages) {
@@ -53,6 +58,17 @@ function hideChat() {
 }
 
 window.onload = () => {
+    console.log('initializing socket.io');
+    const socket = io(window.BACKEND_URL);
+
+    socket.on("message", data => {
+        console.log("incoming message", data);
+        //if the incoming message is for the currently active location, append that meesage to chat
+        if(data.location.id === window._infoWindow._location.id) {
+            addMessage(data, $("#chat-content"));
+        }
+    })
+
     console.log("initializing map");
     marked.setOptions({
         breaks: true
@@ -213,7 +229,10 @@ window.onload = () => {
 
         //when an existing location gets clicked
         google.maps.event.addDomListener(locationMarker, "click", function () {
+            //update ACTIVE marker
             infoWindow._marker = locationMarker;
+
+            //get the newest location data from backend
             $.get(`${window.BACKEND_URL}/locations/${location?.id}`, (data) => {
                 updateInfoWindow(data);
             })
@@ -269,7 +288,7 @@ window.onload = () => {
             },
             method:"POST",
             success: (data) => {
-                addMessage(data, $("#chat-content"));
+                //empty chat input
                 $("#chat-input").val("");
             }
         });
@@ -306,7 +325,8 @@ window.onload = () => {
                         },
                         method:"POST",
                         success: (data) => {
-                            addMessage(data, $("#chat-content"));
+                            //no longer needed as the server is now broadcasting new messages
+                            //addMessage(data, $("#chat-content"));
                         }
                     });
                 }
