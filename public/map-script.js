@@ -31,13 +31,13 @@ async function addMessage(message, $chatContent) {
     }, 500);
 }
 
-async function showChat(location) {
+async function showChat() {
     const $chatContent = $("#chat-content");
     $chatContent.empty();
-    if (location) {
-        $("#chat-title").text(location.name);
+    if (window._infoWindow._location) {
+        $("#chat-title").text(window._infoWindow._location.name);
         //show messages in this chat
-        for (const message of location.messages) {
+        for (const message of window._infoWindow._location.messages) {
             addMessage(message, $chatContent);
         }
     } else {
@@ -66,6 +66,7 @@ window.onload = () => {
     const infoWindow = new google.maps.InfoWindow({
         map: map,
     });
+    window._infoWindow = infoWindow;
     const placeService = new google.maps.places.PlacesService(map);
 
     //when the save button is pressed
@@ -168,12 +169,22 @@ window.onload = () => {
                             </div>
                         </div>
                     </div>
-                    ${isOwner ?
-                `<div class="d-flex justify-content-end my-2">
-                            <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
-                            ${location.id !== undefined ? '<button class="btn btn-danger mx-1" onclick="deleteLocation()">Delete</button>' : ""}
-                        </div>`
-                : ""}
+                    <div class="d-flex justify-content-end my-2">
+                            ${location.messages?
+                                `
+                                <button class="btn btn-info mx-1" onclick="showChat()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                </button>
+                                `:""}
+                            ${isOwner ?
+                                `
+                                <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
+                                ${location.id !== undefined ? '<button class="btn btn-danger mx-1" onclick="deleteLocation()">Delete</button>' : ""}
+                                `
+                            : ""}
+                    </div>
                 </div>
             `
         );
@@ -205,7 +216,6 @@ window.onload = () => {
             infoWindow._marker = locationMarker;
             $.get(`${window.BACKEND_URL}/locations/${location?.id}`, (data) => {
                 updateInfoWindow(data);
-                showChat(data);
             })
         });
     }
@@ -263,6 +273,10 @@ window.onload = () => {
                 $("#chat-input").val("");
             }
         });
+    })
+
+    $("#chat-close").on("click", () => {
+        hideChat();
     })
 
     $("#send-image-btn").on('click', () => {
