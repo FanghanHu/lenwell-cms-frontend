@@ -99,6 +99,7 @@ window.onload = () => {
 
     //when the save button is pressed
     window.saveLocation = () => {
+        let marker = infoWindow._marker;
         let location = { ...(infoWindow._location) };
         location.name = $("#loc-name").val();
         location.address = $("#loc-address").val();
@@ -118,15 +119,8 @@ window.onload = () => {
                 data: location,
                 type: "PUT",
                 success: (res) => {
-                    infoWindow._location.name = res.name;
-                    infoWindow._location.address = res.address;
-                    infoWindow._location.phone_number = res.phone_number;
-                    infoWindow._location.partnered = res.partnered;
-                    infoWindow._location.sale = res.sale;
-                    infoWindow._marker.setIcon({
-                        url: res.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg",
-                        scaledSize: new google.maps.Size(50, 50)
-                    });
+                    marker.setMap(null);
+                    addLocatiionMarker(res);
                     toast.notify("Location Saved", {
                         title: "Success!"
                     })
@@ -225,6 +219,14 @@ window.onload = () => {
 
     //add a marker to the map
     const addLocatiionMarker = (location) => {
+        console.log(location);
+        let icon_url = location.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg";
+        if(location.partnered && location.sale?.partnered_marker) {
+            icon_url = location.sale?.partnered_marker.url;
+        } else if(!location.partnered && location.sale?.assigned_marker) {
+            icon_url = location.sale?.assigned_marker.url;
+        }
+
         const locationMarker = new google.maps.Marker({
             position: {
                 lat: location.lat,
@@ -232,7 +234,7 @@ window.onload = () => {
             },
             map: map,
             icon: {
-                url: location.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg",
+                url: icon_url,
                 scaledSize: new google.maps.Size(50, 50)
             },
         });
