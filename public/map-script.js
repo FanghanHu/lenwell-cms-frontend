@@ -1,8 +1,20 @@
 
+//user cache
+const users = {};
+
 async function addMessage(message, $chatContent) {
     const messageText = document.createElement("div");
     //query for sender name if the message doens't come with sender data
-    const sender = (typeof message.sender) === "object" ? message.sender : await $.get(`${window.BACKEND_URL}/users/${message.sender}`);
+    let sender = undefined;
+    
+    if((typeof message.sender) === "object" || message.sender === "undefined") {
+        sender = message.sender;
+    } else if(users[message.sender]) {
+        sender = users[message.sender]
+    } else {
+        sender = await $.get(`${window.BACKEND_URL}/users/${message.sender}`);
+        users[sender.id] = sender;
+    }
     //parse chat markdown into html
     messageText.innerHTML = marked.parse(message.text);
     //make all images in message Text the same width
@@ -43,7 +55,7 @@ async function showChat() {
         $("#chat-title").text(window._infoWindow._location.name);
         //show messages in this chat
         for (const message of window._infoWindow._location.messages) {
-            addMessage(message, $chatContent);
+            await addMessage(message, $chatContent);
         }
     } else {
         $("#chat-title").text(chat);
@@ -62,7 +74,7 @@ window.onload = () => {
     const socket = io(window.BACKEND_URL);
 
     socket.on("message", data => {
-        console.log("incoming message", data);
+        //console.log("incoming message", data);
         //if the incoming message is for the currently active location, append that meesage to chat
         if(data.location.id === window._infoWindow._location.id) {
             addMessage(data, $("#chat-content"));
