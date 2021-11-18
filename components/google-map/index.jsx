@@ -19,7 +19,7 @@ export default function GoogleMap() {
                         <label className="ml-2" htmlFor="chat-input">Message:</label>
                         <textarea className="form-control" id="chat-input" rows="5" style={{ resize: "none" }}></textarea>
                     </div>
-                    <div className="d-flex justify-content-end">
+                    <div className="d-flex justify-content-end mb-3">
                         <input id="image-input" type="file" accept="image/*" className="d-none" />
                         <button className="btn btn-warning mx-1 px-3" id="send-image-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
