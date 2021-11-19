@@ -301,7 +301,7 @@ window.onload = () => {
 
     //add a marker to the map
     const addLocatiionMarker = (location) => {
-        console.log(location);
+        //console.log(location);
         let icon_url = location.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg";
         if (location.partnered && location.sale?.partnered_marker) {
             icon_url = location.sale?.partnered_marker.url;
