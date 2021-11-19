@@ -90,6 +90,7 @@ window.onload = () => {
     const map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 29.718557455282742, lng: -95.51367567423155 },
         zoom: 15,
+        disableDefaultUI: true,
     });
     const infoWindow = new google.maps.InfoWindow({
         map: map,
