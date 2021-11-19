@@ -22,9 +22,12 @@ export default function Home({user}) {
   }, []);
   return (
     <div style={{
-      height:"100vh",
+      height:"100%",
       display: "flex",
-      flexDirection: "column"
+      flexDirection: "column",
+      position:"fixed",
+      top:"0",
+      left: "0"
     }}>
       <Header user={user}></Header>
       <GoogleMap></GoogleMap>
