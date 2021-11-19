@@ -41,7 +41,7 @@ export default nc()
       await req.session.save();
       res.json(user);
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       const { response: fetchResponse } = error;
       if (fetchResponse) {
         return res.status(fetchResponse?.status || 500).json(error.response?.data);
