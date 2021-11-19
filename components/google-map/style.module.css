@@ -4,6 +4,26 @@
     flex-grow: 1;
 }
 
+.search {
+    margin-top: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: max-content;
+    height: 2.5em;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    margin-left: 12px;
+    padding: 0 11px 0 13px;
+    text-overflow: ellipsis;
+    width: 400px;
+}
+
 .chat {
     display: flex;
     flex-direction: column;

@@ -34,6 +34,7 @@ export default function GoogleMap() {
                     </div>
                 </div>
             </div>
+            <input type="text" id="map-search" placeholder="search" className={style.search}></input>
             <div id="map" className={style.map}>
             </div>
             <script src="./map-script.js"></script>

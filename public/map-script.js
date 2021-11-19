@@ -6,10 +6,10 @@ async function addMessage(message, $chatContent) {
     const messageText = document.createElement("div");
     //query for sender name if the message doens't come with sender data
     let sender = undefined;
-    
-    if((typeof message.sender) === "object" || message.sender === "undefined") {
+
+    if ((typeof message.sender) === "object" || message.sender === "undefined") {
         sender = message.sender;
-    } else if(users[message.sender]) {
+    } else if (users[message.sender]) {
         sender = users[message.sender]
     } else {
         sender = await $.get(`${window.BACKEND_URL}/users/${message.sender}`);
@@ -76,7 +76,7 @@ window.onload = () => {
     socket.on("message", data => {
         //console.log("incoming message", data);
         //if the incoming message is for the currently active location, append that meesage to chat
-        if(data.location.id === window._infoWindow._location.id) {
+        if (data.location.id === window._infoWindow._location.id) {
             addMessage(data, $("#chat-content"));
         }
     })
@@ -96,6 +96,87 @@ window.onload = () => {
     });
     window._infoWindow = infoWindow;
     const placeService = new google.maps.places.PlacesService(map);
+
+    const mapSearch = document.getElementById("map-search");
+    const searchBox = new google.maps.places.SearchBox(mapSearch);
+
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(mapSearch);
+    // Bias the SearchBox results towards current map's viewport.
+    map.addListener("bounds_changed", () => {
+        searchBox.setBounds(map.getBounds());
+    });
+
+    let markers = [];
+
+  // Listen for the event fired when the user selects a prediction and retrieve
+  // more details for that place.
+  searchBox.addListener("places_changed", () => {
+    const places = searchBox.getPlaces();
+
+    if (places.length == 0) {
+      return;
+    }
+
+    // Clear out the old markers.
+    markers.forEach((marker) => {
+      marker.setMap(null);
+    });
+    markers = [];
+
+    // For each place, get the icon, name and location.
+    const bounds = new google.maps.LatLngBounds();
+
+    places.forEach((place) => {
+      if (!place.geometry || !place.geometry.location) {
+        console.log("Returned place contains no geometry");
+        return;
+      }
+
+      const icon = {
+        url: place.icon,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25),
+      };
+
+      const marker = new google.maps.Marker({
+        map,
+        icon,
+        title: place.name,
+        position: place.geometry.location,
+      });
+
+      google.maps.event.addDomListener(marker, "click", function () {
+        const { formatted_address, formatted_phone_number, name } = place;
+
+        //update ACTIVE marker
+        infoWindow._marker = marker;
+        updateInfoWindow({
+            lng: place.geometry.location.lng(),
+            lat: place.geometry.location.lat(),
+            name: name,
+            address: formatted_address,
+            phone_number: formatted_phone_number,
+            partnered: false,
+            sale: user
+        });
+        
+    });
+
+      // Create a marker for each place.
+      markers.push(
+        marker
+      );
+      if (place.geometry.viewport) {
+        // Only geocodes have viewport.
+        bounds.union(place.geometry.viewport);
+      } else {
+        bounds.extend(place.geometry.location);
+      }
+    });
+    map.fitBounds(bounds);
+  });
 
     //when the save button is pressed
     window.saveLocation = () => {
@@ -192,20 +273,20 @@ window.onload = () => {
                         </div>
                     </div>
                     <div class="d-flex justify-content-end my-2">
-                            ${location.messages?
-                                `
+                            ${location.messages ?
+                `
                                 <button class="btn btn-info mx-1" onclick="showChat()">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
                                 </button>
-                                `:""}
+                                `: ""}
                             ${isOwner ?
-                                `
+                `
                                 <button class="btn btn-success mx-1" onclick="saveLocation()">Save</button>
                                 ${location.id !== undefined ? '<button class="btn btn-danger mx-1" onclick="deleteLocation()">Delete</button>' : ""}
                                 `
-                            : ""}
+                : ""}
                     </div>
                 </div>
             `
@@ -221,9 +302,9 @@ window.onload = () => {
     const addLocatiionMarker = (location) => {
         console.log(location);
         let icon_url = location.partnered ? "/assets/icon/green-marker.svg" : "/assets/icon/gray-marker.svg";
-        if(location.partnered && location.sale?.partnered_marker) {
+        if (location.partnered && location.sale?.partnered_marker) {
             icon_url = location.sale?.partnered_marker.url;
-        } else if(!location.partnered && location.sale?.assigned_marker) {
+        } else if (!location.partnered && location.sale?.assigned_marker) {
             icon_url = location.sale?.assigned_marker.url;
         }
 
@@ -300,7 +381,7 @@ window.onload = () => {
                 location: infoWindow._location,
                 text: $("#chat-input").val()
             },
-            method:"POST",
+            method: "POST",
             success: (data) => {
                 //empty chat input
                 $("#chat-input").val("");
@@ -325,11 +406,11 @@ window.onload = () => {
         $.ajax({
             url: `${window.BACKEND_URL}/upload`,
             data: fd,
-            method:"POST",
+            method: "POST",
             processData: false,
             contentType: false,
             success: (res) => {
-                for(const image of res) {
+                for (const image of res) {
                     $.ajax({
                         url: `${window.BACKEND_URL}/messages`,
                         data: {
@@ -337,7 +418,7 @@ window.onload = () => {
                             location: infoWindow._location,
                             text: `![image](${image.url})`
                         },
-                        method:"POST",
+                        method: "POST",
                         success: (data) => {
                             //no longer needed as the server is now broadcasting new messages
                             //addMessage(data, $("#chat-content"));
