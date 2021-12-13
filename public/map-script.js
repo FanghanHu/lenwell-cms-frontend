@@ -274,7 +274,7 @@ window.onload = () => {
                         </div>
                     </div>
                     <div class="d-flex justify-content-end my-2">
-                            <a class="btn btn-primary mx-1" href="geo:${location.lng}, ${location.lat}">
+                            <a class="btn btn-primary mx-1" href="geo:${location.lat}, ${location.lng}">
                                 Nav
                             </a>
                             ${location.messages ?
@@ -433,10 +433,12 @@ window.onload = () => {
         });
     })
 
-    //load locations from server
-    $.get(`${window.BACKEND_URL}/locations`).then((data) => {
-        for (const location of data) {
-            addLocatiionMarker(location);
-        }
-    })
+    setTimeout(() => {
+        //load locations from server
+        $.get(`${window.BACKEND_URL}/locations`).then((data) => {
+            for (const location of data) {
+                addLocatiionMarker(location);
+            }
+        })
+    }, 1000);
 }
