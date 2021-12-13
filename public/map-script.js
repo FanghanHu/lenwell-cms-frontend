@@ -274,7 +274,7 @@ window.onload = () => {
                         </div>
                     </div>
                     <div class="d-flex justify-content-end my-2">
-                            <a class="btn btn-primary mx-1" href="geo:${location.lat}, ${location.lng}">
+                            <a class="btn btn-primary mx-1" href="geo:${location.lat}, ${location.lng}?q=${location.name}">
                                 Nav
                             </a>
                             ${location.messages ?
