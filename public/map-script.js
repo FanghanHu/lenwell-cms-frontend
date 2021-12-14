@@ -80,6 +80,7 @@ function hideList() {
 function updateList() {
     const $listContent = $("#list-content");
     $listContent.empty();
+    window.markers.sort((a, b) => (a.location.name ?? "").toUpperCase() > (b.location.name ?? "").toUpperCase() ? 1 : -1);
     for(const marker of window.markers) {
 
         //only show current user's
