@@ -61,12 +61,55 @@ async function showChat() {
         $("#chat-title").text(chat);
     }
 
-
     $("#chat").css("left", "0");
 }
 
 function hideChat() {
     $("#chat").css("left", "-100%");
+}
+
+function showList() {
+    const $list = $("#list");
+    $("#list").css("right", "0");
+}
+
+function hideList() {
+    $("#list").css("right", "-110%");
+}
+
+function updateList() {
+    const $listContent = $("#list-content");
+    $listContent.empty();
+    for(const marker of window.markers) {
+
+        //only show current user's
+        if(user.id !== marker.location?.sale?.id) {
+            continue;
+        }
+
+        const markerEl = $(`
+            <div class="btn btn-success w-100 my-1">
+                ${marker.location.name}
+            </div>
+        `);
+        markerEl.on('click', () => {
+            new google.maps.event.trigger(marker, "click");
+            hideList();
+        });
+        $listContent.append(markerEl);
+    }
+}
+
+function removeMarker(marker) {
+    //remove marker from map
+    marker.setMap(null);
+    //remove marker from array
+    for(let i = 0; i < window.markers.length; i++) {
+        if(window.markers[i] === marker) {
+            window.markers.splice(i, 1);
+            break;
+        }
+    }
 }
 
 window.onload = () => {
@@ -201,8 +244,9 @@ window.onload = () => {
                 data: location,
                 type: "PUT",
                 success: (res) => {
-                    marker.setMap(null);
+                    removeMarker(marker);
                     addLocatiionMarker(res);
+                    updateList();
                     toast.notify("Location Saved", {
                         title: "Success!"
                     })
@@ -215,6 +259,7 @@ window.onload = () => {
                 (res) => {
                     let newLoc = res;
                     addLocatiionMarker(newLoc);
+                    updateList();
                     toast.notify("New Location Created", {
                         title: "Success!"
                     })
@@ -231,7 +276,10 @@ window.onload = () => {
                 url: `${window.BACKEND_URL}/locations/${infoWindow?._location?.id}`,
                 type: "DELETE",
                 success: (res) => {
-                    infoWindow._marker?.setMap(null);
+                    if(infoWindow._marker) {
+                        removeMarker(infoWindow._marker);
+                    }
+                    updateList();
                     infoWindow.close();
                 }
             });
@@ -324,6 +372,8 @@ window.onload = () => {
             },
         });
 
+        
+
         locationMarker.location = location;
 
         //when an existing location gets clicked
@@ -336,6 +386,9 @@ window.onload = () => {
                 updateInfoWindow(data);
             })
         });
+
+        window.markers.push(locationMarker);
+        return locationMarker;
     }
 
     //when the map is clicked
@@ -436,9 +489,12 @@ window.onload = () => {
     setTimeout(() => {
         //load locations from server
         $.get(`${window.BACKEND_URL}/locations`).then((data) => {
+            //reset markers array
+            window.markers = [];
             for (const location of data) {
                 addLocatiionMarker(location);
             }
+            updateList();
         })
     }, 1000);
 }
