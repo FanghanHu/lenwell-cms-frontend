@@ -1,5 +1,7 @@
 import { LoadScript, GoogleMap } from "@react-google-maps/api";
 import { useState } from "react";
+import SearchBox from "../search-box";
+import SearchResultMarker from "../search-result-marker";
 import StoreMarker from "../store-marker";
 import style from "./style.module.css";
 
@@ -13,22 +15,41 @@ const center = {
 	lng: -95.51367567423155,
 };
 
+const libraries = ["places"];
+
 export default function Map({ googleMapsApiKey }) {
-    const [zoom, setZoom] = useState(10);
-    const handleZoomChange = function () {
-        setZoom(this.getZoom());
-    }
+	const [zoom, setZoom] = useState(10);
+	const [bounds, setBounds] = useState(null);
+    const [searchResults, setSearchResults] = useState([]);
+
+	function handleZoomChange() {
+		setZoom(this.getZoom());
+	}
+
+	function handleBoundsChanged() {
+		setBounds(this.getBounds());
+	}
 
 	return (
-		<LoadScript googleMapsApiKey={googleMapsApiKey}>
+		<LoadScript googleMapsApiKey={googleMapsApiKey} libraries={libraries}>
 			<GoogleMap
 				mapContainerStyle={containerStyle}
 				center={center}
 				zoom={zoom}
-                onZoomChanged={handleZoomChange}
+				onZoomChanged={handleZoomChange}
+				onBoundsChanged={handleBoundsChanged}
 			>
-                <StoreMarker icon={"/assets/icon/gray-marker.svg"} position={center} zoom={zoom}/>
-            </GoogleMap>
+				<SearchBox
+					onPlacesChanged={setSearchResults}
+					bounds={bounds}
+				/>
+                {searchResults.map((searchResult, index) => <SearchResultMarker key={`search-result-${index}`} searchResult={searchResult} />)}
+				<StoreMarker
+					icon={"/assets/icon/gray-marker.svg"}
+					position={center}
+					zoom={zoom}
+				/>
+			</GoogleMap>
 		</LoadScript>
 	);
 }
