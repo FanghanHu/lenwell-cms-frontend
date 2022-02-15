@@ -1,9 +1,11 @@
 import { LoadScript, GoogleMap } from "@react-google-maps/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import SearchBox from "../search-box";
 import SearchResultMarker from "../search-result-marker";
 import StoreMarker from "../store-marker";
+import MapContext from "../../context/map-context";
 import style from "./style.module.css";
+
 
 const containerStyle = {
 	width: "100%",
@@ -20,7 +22,8 @@ const libraries = ["places"];
 export default function Map({ googleMapsApiKey }) {
 	const [zoom, setZoom] = useState(10);
 	const [bounds, setBounds] = useState(null);
-    const [searchResults, setSearchResults] = useState([]);
+	const [searchResults, setSearchResults] = useState([]);
+	const mapRef = useRef(null);
 
 	function handleZoomChange() {
 		setZoom(this.getZoom());
@@ -28,6 +31,10 @@ export default function Map({ googleMapsApiKey }) {
 
 	function handleBoundsChanged() {
 		setBounds(this.getBounds());
+	}
+
+	function handleLoad(map) {
+		mapRef.current = map;
 	}
 
 	return (
@@ -38,17 +45,22 @@ export default function Map({ googleMapsApiKey }) {
 				zoom={zoom}
 				onZoomChanged={handleZoomChange}
 				onBoundsChanged={handleBoundsChanged}
+                onLoad={handleLoad}
 			>
-				<SearchBox
-					onPlacesChanged={setSearchResults}
-					bounds={bounds}
-				/>
-                {searchResults.map((searchResult, index) => <SearchResultMarker key={`search-result-${index}`} searchResult={searchResult} />)}
-				<StoreMarker
-					icon={"/assets/icon/gray-marker.svg"}
-					position={center}
-					zoom={zoom}
-				/>
+				<MapContext map={mapRef.current}>
+					<SearchBox onPlacesChanged={setSearchResults} bounds={bounds} />
+					{searchResults.map((searchResult, index) => (
+						<SearchResultMarker
+							key={`search-result-${index}`}
+							searchResult={searchResult}
+						/>
+					))}
+					<StoreMarker
+						icon={"/assets/icon/white-pin.svg"}
+						position={center}
+						zoom={zoom}
+					/>
+				</MapContext>
 			</GoogleMap>
 		</LoadScript>
 	);

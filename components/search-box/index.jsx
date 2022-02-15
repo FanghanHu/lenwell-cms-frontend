@@ -1,7 +1,5 @@
 import { StandaloneSearchBox } from "@react-google-maps/api";
 
-
-
 export default function SearchBox({onPlacesChanged, bounds}) {
 	return (
 		<StandaloneSearchBox onPlacesChanged={function() {onPlacesChanged(this.getPlaces())}} bounds={bounds}>

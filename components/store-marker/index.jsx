@@ -1,7 +1,6 @@
 import { Marker } from "@react-google-maps/api";
 
 export default function StoreMarker({ icon, position, zoom }) {
-
 	let scaledSize;
 	if (zoom >= 22) {
 		scaledSize = new google.maps.Size(100, 100);
