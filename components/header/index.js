@@ -1,9 +1,20 @@
 import { useRouter } from "next/dist/client/router";
 import style from "./style.module.css";
 import axios from 'axios';
+import {useUser} from "../../context/user-context";
+import { useEffect } from "react";
 
-export default function Header({user}) {
+export default function Header() {
     const router = useRouter();
+    const user = useUser();
+
+    useEffect(() => {
+        if(!user) {
+          router.push('/login');
+          return <div>You need to login first</div>
+        }
+    }, []);
+
     const logout = () =>  {
         axios.post('/api/logout').then(() => {
             router.push('/login')
