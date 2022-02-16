@@ -6,6 +6,7 @@ import StoreMarker from "../store-marker";
 import MapContext from "../../context/map-context";
 import style from "./style.module.css";
 import axios from "axios";
+import StoreInfoWindow from "../store-info-window";
 
 const containerStyle = {
 	width: "100%",
@@ -24,6 +25,7 @@ export default function Map({ googleMapsApiKey }) {
 	const [bounds, setBounds] = useState(null);
 	const [searchResults, setSearchResults] = useState([]);
 	const [locations, setLocations] = useState([]);
+    const [activeLocation, setActiveLocation] = useState(null);
 	const mapRef = useRef(null);
 
 	function handleZoomChange() {
@@ -59,13 +61,15 @@ export default function Map({ googleMapsApiKey }) {
 			});
 	}, []);
 
+
+    //TODO: hide default close button, set active location to null when clicking on the new close button
 	return (
 		<LoadScript googleMapsApiKey={googleMapsApiKey} libraries={libraries}>
 			<GoogleMap
 				mapContainerStyle={containerStyle}
 				center={center}
 				zoom={zoom}
-				onZoomChanged={handleZoomChange}
+				onZoomChanged={handleZoomChange} 
 				onBoundsChanged={handleBoundsChanged}
 				onLoad={handleLoad}
 			>
@@ -80,10 +84,12 @@ export default function Map({ googleMapsApiKey }) {
 					{locations.map((location, index) => (
                         <StoreMarker
                             key={`store-marker-${index}`}
+                            setActiveLocation={setActiveLocation}
                             location={location}
                             zoom={zoom}
 					    />
                     ))}
+                    {activeLocation ? <StoreInfoWindow location={activeLocation} setActiveLocation={setActiveLocation}/> : null}
 				</MapContext>
 			</GoogleMap>
 		</LoadScript>

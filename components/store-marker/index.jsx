@@ -1,6 +1,6 @@
 import { Marker } from "@react-google-maps/api";
 
-export default function StoreMarker({ icon, location, zoom }) {
+export default function StoreMarker({location, zoom, setActiveLocation }) {
 	let scaledSize;
 	if (zoom >= 22) {
 		scaledSize = new google.maps.Size(100, 100);
@@ -25,6 +25,10 @@ export default function StoreMarker({ icon, location, zoom }) {
         url = location.sale?.assigned_marker.url;
     }
 
+    function handleClick() {
+        setActiveLocation(location);
+    }
+
 	return (
 		<Marker
 			icon={{
@@ -32,6 +36,7 @@ export default function StoreMarker({ icon, location, zoom }) {
 				scaledSize: scaledSize,
 			}}
 			position={location}
+            onClick={handleClick}
 		/>
 	);
 }

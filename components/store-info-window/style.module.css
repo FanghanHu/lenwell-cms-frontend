@@ -1,0 +1,21 @@
+.container {
+	padding: 1rem;
+	background: white;
+	border: 1px solid #eee;
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+	border-radius: 10px;
+}
+
+.anchor-wrapper {
+    position: absolute;
+	bottom: -19px;
+    left: calc(50% - 20px);
+    filter: drop-shadow(7px 7px 3px rgba(0, 0, 0, 0.2));
+}
+
+.anchor {
+	width: 40px;
+	height: 20px;
+    background: white;
+    clip-path: polygon(100% 0, 0 0, 50% 100%);
+}
