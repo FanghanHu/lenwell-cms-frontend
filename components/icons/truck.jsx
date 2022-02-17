@@ -2,7 +2,7 @@ export default function TruckIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height="1em"
+      width="24px"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
