@@ -7,6 +7,7 @@ import CloseButton from "react-bootstrap/CloseButton";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
 import TruckIcon from "../icons/truck";
+import ChatIcon from "../icons/chat";
 
 export default function StoreInfoWindow({ location, setActiveLocation }) {
 	const [locationName, setLocationName] = useState("");
@@ -61,6 +62,10 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 
 	function handleSave() {
 		//TODO: send updated location to backend and update local cache
+	}
+
+	function handleChat() {
+		//TODO: toggle chat panel
 	}
 
 	//if the location belongs to the current user, or if it is free to take,
@@ -149,6 +154,11 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 					</Form.Group>
 				</div>
 				<div className="d-flex justify-content-end">
+					{location.messages ? 
+						<Button className="mx-1 text-white" variant="info" onClick={handleChat}>
+							<ChatIcon/>
+						</Button>
+					: null}
 					<Button
 						className="mx-1"
 						variant="primary"
