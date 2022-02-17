@@ -89,7 +89,7 @@ export default function Map({ googleMapsApiKey }) {
                             zoom={zoom}
 					    />
                     ))}
-                    {activeLocation ? <StoreInfoWindow location={activeLocation} setActiveLocation={setActiveLocation}/> : null}
+                    <StoreInfoWindow location={activeLocation} setActiveLocation={setActiveLocation}/>
 				</MapContext>
 			</GoogleMap>
 		</LoadScript>

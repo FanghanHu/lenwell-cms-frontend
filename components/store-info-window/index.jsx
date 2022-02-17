@@ -34,12 +34,12 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 
 	useEffect(() => {
 		//update displayed information as location changes
-		setLocationName(location.name ?? "");
-		setDisplayName(location["display_name"] ?? "");
-		setAddress(location.address ?? "");
-		setPhone(location.phone ?? "");
-		setSale(location.sale ?? undefined);
-		setpartnered(location.partnered ?? false);
+		setLocationName(location?.name ?? "");
+		setDisplayName(location?.["display_name"] ?? "");
+		setAddress(location?.address ?? "");
+		setPhone(location?.phone ?? "");
+		setSale(location?.sale ?? undefined);
+		setpartnered(location?.partnered ?? false);
 	}, [location]);
 
 	/**
@@ -82,7 +82,8 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 		<OverlayView
 			mapPaneName={OverlayView.FLOAT_PANE}
 			getPixelPositionOffset={getOffset}
-			position={location}
+			position={location ?? {lng: 0, lat: 0}}
+			style={{display: location ? "block" : "none"}}
 		>
 			<div
 				className={style.container}
@@ -158,7 +159,7 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 					</Form.Group>
 				</div>
 				<div className="d-flex justify-content-end">
-					{location.messages ? 
+					{location?.messages ? 
 						<Button className="mx-1 text-white" variant="info" onClick={handleChat}>
 							<ChatIcon/>
 						</Button>
@@ -166,7 +167,7 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 					<Button
 						className="mx-1"
 						variant="primary"
-						href={`https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`}
+						href={`https://www.google.com/maps/dir/?api=1&destination=${location?.lat},${location?.lng}`}
 					>
 						<TruckIcon/>
 					</Button>
