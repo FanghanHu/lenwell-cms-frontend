@@ -5,6 +5,8 @@ import Form from "react-bootstrap/Form";
 import { useEffect, useState } from "react";
 import CloseButton from "react-bootstrap/CloseButton";
 import axios from "axios";
+import Button from "react-bootstrap/Button";
+import TruckIcon from "../icons/truck";
 
 export default function StoreInfoWindow({ location, setActiveLocation }) {
 	const [locationName, setLocationName] = useState("");
@@ -49,12 +51,16 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 		};
 	}
 
+	function stopPropagation(e) {
+		e.stopPropagation();
+	}
+
 	function handleClose() {
 		setActiveLocation(null);
 	}
 
-	function stopPropagation(e) {
-		e.stopPropagation();
+	function handleSave() {
+		//TODO: send updated location to backend and update local cache
 	}
 
 	//if the location belongs to the current user, or if it is free to take,
@@ -97,7 +103,7 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 					/>
 				</Form.Group>
 				<Form.Group className="my-1">
-					<Form.Label>address:</Form.Label>
+					<Form.Label>Address:</Form.Label>
 					<Form.Control
 						type="text"
 						value={address}
@@ -115,15 +121,21 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 					/>
 				</Form.Group>
 				<Form.Group className="my-1">
-					<Form.Label>Sale:</Form.Label>
+					<Form.Label>Salesperson:</Form.Label>
 					<Form.Select
 						value={sale?.id}
-						onChange={(e) => setSale(saleList.find(sale => sale.id === e.target.value))}
-						disabled={!(user.isAdmin)}
+						onChange={(e) =>
+							setSale(saleList.find((sale) => sale.id === e.target.value))
+						}
+						disabled={!user.isAdmin}
 					>
-                        <option>None</option>
-                        {saleList.map(sale => (<option key={`sale-${sale.id}`} value={sale.id}>{sale.name}</option>))}
-                    </Form.Select>
+						<option>None</option>
+						{saleList.map((sale) => (
+							<option key={`sale-${sale.id}`} value={sale.id}>
+								{sale.name}
+							</option>
+						))}
+					</Form.Select>
 				</Form.Group>
 				<div className="d-flex justify-content-end my-2">
 					<Form.Group>
@@ -136,7 +148,18 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 						/>
 					</Form.Group>
 				</div>
-				<div className="d-flex justify-content-end"></div>
+				<div className="d-flex justify-content-end">
+					<Button
+						className="mx-1"
+						variant="primary"
+						href={`https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`}
+					>
+						<TruckIcon/>
+					</Button>
+					<Button variant="success" className="mx-1" onClick={handleSave}>
+						Save
+					</Button>
+				</div>
 				{/*The tip of this info */}
 				<div className={style["anchor-wrapper"]}>
 					<div className={style.anchor}></div>
