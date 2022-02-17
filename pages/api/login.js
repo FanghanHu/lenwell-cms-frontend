@@ -28,6 +28,7 @@ export default nc()
             role: result.data.user.role,
             name: result.data.user.name,
             strapiToken: result.data.jwt,
+            isAdmin: result.data.user.isAdmin,
             };
 
       if (!user.confirmed) {
