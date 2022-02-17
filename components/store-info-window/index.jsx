@@ -8,6 +8,7 @@ import axios from "axios";
 import Button from "react-bootstrap/Button";
 import TruckIcon from "../icons/truck";
 import ChatIcon from "../icons/chat";
+import { toast } from 'react-nextjs-toast'
 
 export default function StoreInfoWindow({ location, setActiveLocation }) {
 	const [locationName, setLocationName] = useState("");
@@ -62,6 +63,9 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 
 	function handleSave() {
 		//TODO: send updated location to backend and update local cache
+		toast.notify("Saving...", {
+			title: "Success!",
+		});
 	}
 
 	function handleChat() {
