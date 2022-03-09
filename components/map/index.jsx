@@ -48,21 +48,22 @@ export default function Map({ googleMapsApiKey }) {
 		setLocations(locations.filter((el) => el !== location));
 	}
 
-	useEffect(() => {
+	useEffect(async () => {
 		//load locations from backend
 		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-		axios
-			.get(`${BACKEND_URL}/locations`)
-			.then((res) => {
-                setLocations(res.data);
-			})
-			.catch((err) => {
-				console.error(err);
-			});
+		const temp = [];
+		let res;
+
+		//read locations 100 at a time until all data is read
+		do {
+			res = await axios.get(`${BACKEND_URL}/locations?_start=${temp.length}&_limit=100`);
+			console.log(`reading location data ${temp.length} ~ ${temp.length + res.data.length}:`, res.data);
+			temp.push.apply(temp, res.data);
+		} while (res.data.length === 100);
+
+		setLocations(temp);
 	}, []);
 
-
-    //TODO: hide default close button, set active location to null when clicking on the new close button
 	return (
 		<LoadScript googleMapsApiKey={googleMapsApiKey} libraries={libraries}>
 			<GoogleMap
