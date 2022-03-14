@@ -10,7 +10,7 @@ import TruckIcon from "../icons/truck";
 import ChatIcon from "../icons/chat";
 import { toast } from 'react-nextjs-toast'
 
-export default function StoreInfoWindow({ location, setActiveLocation }) {
+export default function StoreInfoWindow({ location, setActiveLocation, updateLocation}) {
 	const [locationName, setLocationName] = useState("");
 	const [displayName, setDisplayName] = useState("");
 	const [address, setAddress] = useState("");
@@ -37,7 +37,7 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 		setLocationName(location?.name ?? "");
 		setDisplayName(location?.["display_name"] ?? "");
 		setAddress(location?.address ?? "");
-		setPhone(location?.phone ?? "");
+		setPhone(location?.phone_number ?? "");
 		setSale(location?.sale ?? undefined);
 		setpartnered(location?.partnered ?? false);
 	}, [location]);
@@ -61,11 +61,41 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 		setActiveLocation(null);
 	}
 
-	function handleSave() {
+	async function handleSave() {
 		//TODO: send updated location to backend and update local cache
 		toast.notify("Saving...", {
-			title: "Success!",
+			title: "Please Wait",
 		});
+
+		const updatedLocation = {
+			id: location.id,
+			name: locationName,
+			"display_name": displayName,
+			address: address,
+			"phone_number": phone,
+			sale: sale,
+			partnered: partnered,
+			lng: location.lng,
+			lat: location.lat
+		}
+
+		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+		if(updatedLocation.id === undefined) {
+			//new location
+			await axios.post(`${BACKEND_URL}/locations`, updatedLocation);
+			toast.notify("Saved", {
+				title: "Success",
+			});
+			setActiveLocation(null);
+		} else {
+			//update location
+			await axios.put(`${BACKEND_URL}/locations/${updatedLocation.id}`, updatedLocation);
+			updateLocation(updatedLocation);
+			toast.notify("Saved", {
+				title: "Success",
+			});
+			setActiveLocation(null);
+		}
 	}
 
 	function handleChat() {
@@ -134,8 +164,10 @@ export default function StoreInfoWindow({ location, setActiveLocation }) {
 					<Form.Label>Salesperson:</Form.Label>
 					<Form.Select
 						value={sale?.id}
-						onChange={(e) =>
-							setSale(saleList.find((sale) => sale.id === e.target.value))
+						onChange={(e) => {
+								const newSales = saleList.find((sale) => sale.id == e.target.value);
+								setSale(newSales);
+							}
 						}
 						disabled={!user.isAdmin}
 					>

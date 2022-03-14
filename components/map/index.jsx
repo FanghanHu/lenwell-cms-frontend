@@ -48,6 +48,15 @@ export default function Map({ googleMapsApiKey }) {
 		setLocations(locations.filter((el) => el !== location));
 	}
 
+	function updateLocation(location) {
+		if(!location.id) {
+			console.error("Error: trying to update a location without any id");
+		}
+
+		//replace the location if the location id is the same
+		setLocations(locations.map(el => el.id === location.id ? location : el));
+	}
+
 	useEffect(async () => {
 		//load locations from backend
 		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -90,7 +99,7 @@ export default function Map({ googleMapsApiKey }) {
                             zoom={zoom}
 					    />
                     ))}
-                    <StoreInfoWindow location={activeLocation} setActiveLocation={setActiveLocation}/>
+                    <StoreInfoWindow updateLocation={updateLocation} location={activeLocation} setActiveLocation={setActiveLocation}/>
 				</MapContext>
 			</GoogleMap>
 		</LoadScript>
