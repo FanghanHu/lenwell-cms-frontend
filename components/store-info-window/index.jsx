@@ -10,7 +10,7 @@ import TruckIcon from "../icons/truck";
 import ChatIcon from "../icons/chat";
 import { toast } from 'react-nextjs-toast'
 
-export default function StoreInfoWindow({ location, setActiveLocation, updateLocation, deleteLocation}) {
+export default function StoreInfoWindow({ location, setActiveLocation, updateLocation, deleteLocation, setShowChatBox}) {
 	const [locationName, setLocationName] = useState("");
 	const [displayName, setDisplayName] = useState("");
 	const [address, setAddress] = useState("");
@@ -116,7 +116,8 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 	}
 
 	function handleChat() {
-		//TODO: toggle chat panel
+		//toggle chat panel
+		setShowChatBox(true);
 	}
 
 	//if the location belongs to the current user, or if it is free to take,
@@ -223,7 +224,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 					Save
 				</Button>
 				{
-					location.id ? <Button variant="danger" className="mx-1" onClick={handleDelete} disabled={!user.isAdmin && location?.sale?.id != user.id}>
+					location.id ? <Button variant="danger" className="mx-1" onClick={handleDelete} disabled={!editable}>
 						Delete
 					</Button> : ""
 				}

@@ -1,0 +1,24 @@
+.container {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    left: -100%;
+    top: 0;
+    height: 100vh;
+    width: min(400px, 100vw);
+    z-index: 100;
+    background: white;
+    box-shadow: 5px 0 10px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s ease-out;
+}
+
+.container.active {
+    left: 0;
+}
+
+.chat-container {
+    background: rgba(131, 131, 131, 0.1);
+    flex-grow: 1;
+    margin: 5px;
+    border-radius: 8px;
+}

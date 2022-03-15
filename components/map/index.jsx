@@ -8,6 +8,7 @@ import style from "./style.module.css";
 import axios from "axios";
 import StoreInfoWindow from "../store-info-window";
 import { useUser } from "../../context/user-context";
+import ChatBox from "../chat-box";
 
 const containerStyle = {
 	width: "100%",
@@ -28,6 +29,7 @@ export default function Map({ googleMapsApiKey }) {
 	const [locations, setLocations] = useState([]);
 	const [activeLocation, setActiveLocation] = useState(null);
 	const [placeService, setPlaceService] = useState(null);
+	const [showChatBox, setShowChatBox] = useState(false);
 	const mapRef = useRef(null);
 	const user = useUser();
 
@@ -44,10 +46,6 @@ export default function Map({ googleMapsApiKey }) {
 		setPlaceService(new google.maps.places.PlacesService(map));
 	}
 
-	function addLocation(location) {
-		setLocations([...locations, location]);
-	}
-
 	function removeLocation(location) {
 		setLocations(locations.filter((el) => el !== location));
 	}
@@ -59,9 +57,9 @@ export default function Map({ googleMapsApiKey }) {
 
 		//find the location with the same id and replace it
 		const newLocations = [...locations];
-		for(let i = 0; i<newLocations.length; i++) {
+		for (let i = 0; i < newLocations.length; i++) {
 			const el = newLocations[i];
-			if(el.id === location.id) {
+			if (el.id === location.id) {
 				newLocations[i] = location;
 				setLocations(newLocations);
 				return;
@@ -134,6 +132,12 @@ export default function Map({ googleMapsApiKey }) {
 
 	return (
 		<LoadScript googleMapsApiKey={googleMapsApiKey} libraries={libraries}>
+			<ChatBox
+				isActive={showChatBox}
+				setShowChatBox={setShowChatBox}
+				location={activeLocation}
+				updateLocation={updateLocation}
+			/>
 			<GoogleMap
 				mapContainerStyle={containerStyle}
 				center={center}
@@ -164,6 +168,7 @@ export default function Map({ googleMapsApiKey }) {
 						location={activeLocation}
 						setActiveLocation={setActiveLocation}
 						deleteLocation={removeLocation}
+						setShowChatBox={setShowChatBox}
 					/>
 				</MapContext>
 			</GoogleMap>
