@@ -163,6 +163,7 @@ export default function Map({ googleMapsApiKey }) {
 						updateLocation={updateLocation}
 						location={activeLocation}
 						setActiveLocation={setActiveLocation}
+						deleteLocation={removeLocation}
 					/>
 				</MapContext>
 			</GoogleMap>

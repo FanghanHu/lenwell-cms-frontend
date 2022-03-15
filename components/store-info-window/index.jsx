@@ -10,7 +10,7 @@ import TruckIcon from "../icons/truck";
 import ChatIcon from "../icons/chat";
 import { toast } from 'react-nextjs-toast'
 
-export default function StoreInfoWindow({ location, setActiveLocation, updateLocation}) {
+export default function StoreInfoWindow({ location, setActiveLocation, updateLocation, deleteLocation}) {
 	const [locationName, setLocationName] = useState("");
 	const [displayName, setDisplayName] = useState("");
 	const [address, setAddress] = useState("");
@@ -97,6 +97,22 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 			});
 			setActiveLocation(null);
 		}
+	}
+
+	async function handleDelete() {
+		//send Delete Request to backend and update local cache
+		toast.notify("Deleting...", {
+			title: "Please Wait",
+		});
+
+		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+		await axios.delete(`${BACKEND_URL}/locations/${location.id}`);
+		deleteLocation(location);
+		setActiveLocation(null);
+
+		toast.notify("Deleted", {
+			title: "Success",
+		});
 	}
 
 	function handleChat() {
@@ -206,6 +222,11 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 				<Button variant="success" className="mx-1" onClick={handleSave}>
 					Save
 				</Button>
+				{
+					location.id ? <Button variant="danger" className="mx-1" onClick={handleDelete} disabled={!user.isAdmin && location?.sale?.id != user.id}>
+						Delete
+					</Button> : ""
+				}
 			</div>
 			{/*The tip of this info */}
 			<div className={style["anchor-wrapper"]}>
