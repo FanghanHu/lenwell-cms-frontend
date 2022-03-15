@@ -62,7 +62,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 	}
 
 	async function handleSave() {
-		//TODO: send updated location to backend and update local cache
+		//send updated location to backend and update local cache
 		toast.notify("Saving...", {
 			title: "Please Wait",
 		});
@@ -82,7 +82,8 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 		if(updatedLocation.id === undefined) {
 			//new location
-			await axios.post(`${BACKEND_URL}/locations`, updatedLocation);
+			const res = await axios.post(`${BACKEND_URL}/locations`, updatedLocation);
+			updateLocation(res.data);
 			toast.notify("Saved", {
 				title: "Success",
 			});
@@ -109,109 +110,108 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 		user.isAdmin || !location.sale || user.id === location.sale?.id;
 
 	return (
-		<OverlayView
-			mapPaneName={OverlayView.FLOAT_PANE}
-			getPixelPositionOffset={getOffset}
-			position={location ?? {lng: 0, lat: 0}}
-			style={{display: location ? "block" : "none"}}
+		location ? <OverlayView
+		mapPaneName={OverlayView.FLOAT_PANE}
+		getPixelPositionOffset={getOffset}
+		position={location}
+	>
+		<div
+			className={style.container}
+			onClick={stopPropagation}
+			onMouseDown={stopPropagation}
+			onDoubleClick={stopPropagation}
 		>
-			<div
-				className={style.container}
-				onClick={stopPropagation}
-				onMouseDown={stopPropagation}
-				onDoubleClick={stopPropagation}
-			>
-				<div className="d-flex justify-content-end m-1">
-					<CloseButton onClick={handleClose} />
-				</div>
-				<Form.Group className="my-1">
-					<Form.Label>Location Name:</Form.Label>
-					<Form.Control
-						type="text"
-						value={locationName}
-						onChange={(e) => setLocationName(e.target.value)}
-						disabled={!editable}
-					/>
-				</Form.Group>
-				<Form.Group className="my-1">
-					<Form.Label>Display Name:</Form.Label>
-					<Form.Control
-						type="text"
-						value={displayName}
-						onChange={(e) => setDisplayName(e.target.value)}
-						disabled={!editable}
-					/>
-				</Form.Group>
-				<Form.Group className="my-1">
-					<Form.Label>Address:</Form.Label>
-					<Form.Control
-						type="text"
-						value={address}
-						onChange={(e) => setAddress(e.target.value)}
-						disabled={!editable}
-					/>
-				</Form.Group>
-				<Form.Group className="my-1">
-					<Form.Label>Phone Number:</Form.Label>
-					<Form.Control
-						type="text"
-						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
-						disabled={!editable}
-					/>
-				</Form.Group>
-				<Form.Group className="my-1">
-					<Form.Label>Salesperson:</Form.Label>
-					<Form.Select
-						value={sale?.id}
-						onChange={(e) => {
-								const newSales = saleList.find((sale) => sale.id == e.target.value);
-								setSale(newSales);
-							}
-						}
-						disabled={!user.isAdmin}
-					>
-						<option>None</option>
-						{saleList.map((sale) => (
-							<option key={`sale-${sale.id}`} value={sale.id}>
-								{sale.name}
-							</option>
-						))}
-					</Form.Select>
-				</Form.Group>
-				<div className="d-flex justify-content-end my-2">
-					<Form.Group>
-						<Form.Check
-							type="checkbox"
-							label="Partnered"
-							checked={partnered}
-							onChange={(e) => setpartnered(e.target.checked)}
-							disabled={!editable}
-						/>
-					</Form.Group>
-				</div>
-				<div className="d-flex justify-content-end">
-					{location?.messages ? 
-						<Button className="mx-1 text-white" variant="info" onClick={handleChat}>
-							<ChatIcon/>
-						</Button>
-					: null}
-					<Button
-						className="mx-1"
-						variant="primary"
-						href={`https://www.google.com/maps/dir/?api=1&destination=${location?.lat},${location?.lng}`}
-					>
-						<TruckIcon/>
-					</Button>
-					<Button variant="success" className="mx-1" onClick={handleSave}>
-						Save
-					</Button>
-				</div>
-				{/*The tip of this info */}
-				<div className={style["anchor-wrapper"]}>
-					<div className={style.anchor}></div>
-				</div>
+			<div className="d-flex justify-content-end m-1">
+				<CloseButton onClick={handleClose} />
 			</div>
-		</OverlayView>
+			<Form.Group className="my-1">
+				<Form.Label>Location Name:</Form.Label>
+				<Form.Control
+					type="text"
+					value={locationName}
+					onChange={(e) => setLocationName(e.target.value)}
+					disabled={!editable}
+				/>
+			</Form.Group>
+			<Form.Group className="my-1">
+				<Form.Label>Display Name:</Form.Label>
+				<Form.Control
+					type="text"
+					value={displayName}
+					onChange={(e) => setDisplayName(e.target.value)}
+					disabled={!editable}
+				/>
+			</Form.Group>
+			<Form.Group className="my-1">
+				<Form.Label>Address:</Form.Label>
+				<Form.Control
+					type="text"
+					value={address}
+					onChange={(e) => setAddress(e.target.value)}
+					disabled={!editable}
+				/>
+			</Form.Group>
+			<Form.Group className="my-1">
+				<Form.Label>Phone Number:</Form.Label>
+				<Form.Control
+					type="text"
+					value={phone}
+					onChange={(e) => setPhone(e.target.value)}
+					disabled={!editable}
+				/>
+			</Form.Group>
+			<Form.Group className="my-1">
+				<Form.Label>Salesperson:</Form.Label>
+				<Form.Select
+					value={sale?.id}
+					onChange={(e) => {
+							const newSales = saleList.find((sale) => sale.id == e.target.value);
+							setSale(newSales);
+						}
+					}
+					disabled={!user.isAdmin}
+				>
+					<option>None</option>
+					{saleList.map((sale) => (
+						<option key={`sale-${sale.id}`} value={sale.id}>
+							{sale.name}
+						</option>
+					))}
+				</Form.Select>
+			</Form.Group>
+			<div className="d-flex justify-content-end my-2">
+				<Form.Group>
+					<Form.Check
+						type="checkbox"
+						label="Partnered"
+						checked={partnered}
+						onChange={(e) => setpartnered(e.target.checked)}
+						disabled={!editable}
+					/>
+				</Form.Group>
+			</div>
+			<div className="d-flex justify-content-end">
+				{location?.messages ? 
+					<Button className="mx-1 text-white" variant="info" onClick={handleChat}>
+						<ChatIcon/>
+					</Button>
+				: null}
+				<Button
+					className="mx-1"
+					variant="primary"
+					href={`https://www.google.com/maps/dir/?api=1&destination=${location?.lat},${location?.lng}`}
+				>
+					<TruckIcon/>
+				</Button>
+				<Button variant="success" className="mx-1" onClick={handleSave}>
+					Save
+				</Button>
+			</div>
+			{/*The tip of this info */}
+			<div className={style["anchor-wrapper"]}>
+				<div className={style.anchor}></div>
+			</div>
+		</div>
+	</OverlayView> : <></>
 	);
 }
