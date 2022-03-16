@@ -1,5 +1,5 @@
 import { LoadScript, GoogleMap } from "@react-google-maps/api";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import SearchBox from "../search-box";
 import SearchResultMarker from "../search-result-marker";
 import StoreMarker from "../store-marker";
@@ -8,6 +8,7 @@ import style from "./style.module.css";
 import axios from "axios";
 import StoreInfoWindow from "../store-info-window";
 import { useUser } from "../../context/user-context";
+import { useSocket } from "../../context/socket-context";
 import ChatBox from "../chat-box";
 
 const containerStyle = {
@@ -32,6 +33,33 @@ export default function Map({ googleMapsApiKey }) {
 	const [showChatBox, setShowChatBox] = useState(false);
 	const mapRef = useRef(null);
 	const user = useUser();
+	const socket = useSocket();
+
+	useEffect(() => {
+		function handleIncomingMessage(message) {
+			//append message to the location in the locations array
+			const location = locations.find(loc => loc.id === message.location.id);
+			if(location) {
+				const newLocation = {
+					...location,
+					messages: [...(location.messages), message]
+				};
+				updateLocation(newLocation);
+
+				console.log(message);
+
+				//also update the displayed active location if it this the one getting message
+				if(activeLocation?.id === newLocation.id) {
+					setActiveLocation(newLocation);
+				}
+			}
+		}
+		socket.on("message", handleIncomingMessage);
+
+		return () => {
+			socket.off("message", handleIncomingMessage)
+		};
+	}, [socket, locations, activeLocation])
 
 	function handleZoomChange() {
 		setZoom(this.getZoom());
