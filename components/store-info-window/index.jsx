@@ -1,6 +1,6 @@
 import { OverlayView } from "@react-google-maps/api";
 import style from "./style.module.css";
-import { useUser } from "../../context/user-context";
+import { useUser, useUsers } from "../../context/user-context";
 import Form from "react-bootstrap/Form";
 import { useEffect, useState } from "react";
 import CloseButton from "react-bootstrap/CloseButton";
@@ -17,20 +17,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 	const [phone, setPhone] = useState("");
 	const [sale, setSale] = useState();
 	const [partnered, setpartnered] = useState(false);
-	const [saleList, setSaleList] = useState([]);
-
-	useEffect(() => {
-		//get a list of sales
-		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-		axios
-			.get(`${BACKEND_URL}/users`)
-			.then((res) => {
-				setSaleList(res.data);
-			})
-			.catch((err) => {
-				console.error(err);
-			});
-	}, []);
+	const saleList = useUsers();
 
 	useEffect(() => {
 		//update displayed information as location changes
