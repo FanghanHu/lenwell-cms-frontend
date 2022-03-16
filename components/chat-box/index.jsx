@@ -14,11 +14,11 @@ export default function ChatBox({
 	updateLocation,
 }) {
 	const [input, setInput] = useState("");
-    const imageRef = useRef(null);
-    const user = useUser();
+	const imageRef = useRef(null);
+	const user = useUser();
+	const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 	function sendImage(e) {
-		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 		//upload the image
 		const fd = new FormData();
 		fd.append("files", e.target.files[0]);
@@ -28,27 +28,35 @@ export default function ChatBox({
 			data: fd,
 			method: "POST",
 			processData: false,
-			contentType: false
+			contentType: false,
 		}).then((res) => {
-            for (const image of res.data) {
-                axios({
-                    url: `${BACKEND_URL}/messages`,
-                    data: {
-                        sender: user.id,
-                        location: location,
-                        text: `![image](${image.url})`,
-                    },
-                    method: "POST",
-                    success: (data) => {
-                        //no longer needed as the server is now broadcasting new messages
-                        //addMessage(data, $("#chat-content"));
-                    },
-                });
-            }
-        },);
+			for (const image of res.data) {
+				axios({
+					url: `${BACKEND_URL}/messages`,
+					data: {
+						sender: user.id,
+						location: location,
+						text: `![image](${image.url})`,
+					},
+					method: "POST",
+				});
+			}
+		});
 	}
 
-	function sendChat() {}
+	function sendChat() {
+		if (input.trim().length > 0) {
+			axios
+				.post(`${BACKEND_URL}/messages`, {
+					sender: user.id,
+					location: location,
+					text: input,
+				})
+				.then((res) => {
+					setInput("");
+				});
+		}
+	}
 
 	return (
 		<div className={`${style.container} ${isActive ? style.active : ""}`}>
@@ -62,7 +70,7 @@ export default function ChatBox({
 					<Cross />
 				</div>
 			</div>
-			<div className="h4 text-center text-muted m-1">{location?.name}</div>
+			<div className="h4 text-center text-muted m-1">{location?.["display_name"]?.length > 0 ? location["display_name"] : location?.name}</div>
 			<div className={style["chat-container"]}></div>
 			<div className="form-group m-2">
 				<div className="h5">Message:</div>
@@ -70,6 +78,13 @@ export default function ChatBox({
 					value={input}
 					onChange={(e) => {
 						setInput(e.target.value);
+					}}
+					onKeyPress={(e) => {
+						//send chat when ctrl+enter is pressed while focused on this element
+						if (e.code === "Enter" && e.ctrlKey) {
+							e.preventDefault();
+							sendChat();
+						}
 					}}
 					className="form-control"
 					style={{ resize: "none" }}
@@ -80,17 +95,20 @@ export default function ChatBox({
 			<div className="d-flex justify-content-end m-2">
 				<input
 					type="file"
-                    ref={imageRef}
+					ref={imageRef}
 					accept="image/"
 					className="d-none"
-                    onChange={sendImage}
+					onChange={sendImage}
 				/>
-				<button className="btn btn-warning mx-1 px-3" onClick={() => {
-                    imageRef.current.click();
-                }}>
+				<button
+					className="btn btn-warning mx-1 px-3"
+					onClick={() => {
+						imageRef.current.click();
+					}}
+				>
 					<Image />
 				</button>
-				<button className="btn btn-success mx-1 px-3">
+				<button className="btn btn-success mx-1 px-3" onClick={sendChat}>
 					<Chat />
 				</button>
 			</div>
