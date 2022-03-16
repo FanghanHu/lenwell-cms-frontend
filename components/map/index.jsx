@@ -99,6 +99,29 @@ export default function Map({ googleMapsApiKey }) {
 		setLocations(newLocations);
 	}
 
+	/**
+	 * query google for a placeId then focus on it as a new location
+	 */
+	function focusOnPlace(place) {
+		placeService.getDetails(
+			{
+				placeId: place.placeId,
+			},
+			({ formatted_address, formatted_phone_number, name }) => {
+				//once the place's information is gathered, output it on the infoWindow as default info
+				setActiveLocation({
+					lng: place.lng,
+					lat: place.lat,
+					name: name,
+					address: formatted_address,
+					phone_number: formatted_phone_number,
+					partnered: false,
+					sale: user,
+				});
+			}
+		);
+	}
+
 	function onClick(event) {
 		//console.log("event", event);
 		if (event.placeId) {
@@ -106,23 +129,11 @@ export default function Map({ googleMapsApiKey }) {
 			event.stop();
 
 			//get place detail from google
-			placeService.getDetails(
-				{
-					placeId: event.placeId,
-				},
-				({ formatted_address, formatted_phone_number, name }) => {
-					//once the place's information is gathered, output it on the infoWindow as default info
-					setActiveLocation({
-						lng: event.latLng.lng(),
-						lat: event.latLng.lat(),
-						name: name,
-						address: formatted_address,
-						phone_number: formatted_phone_number,
-						partnered: false,
-						sale: user,
-					});
-				}
-			);
+			focusOnPlace({
+				placeId: event.placeId,
+				lat: event.latLng.lat(),
+				lng: event.latLng.lng(),
+			});
 		} else {
 			//click on an empty location
 			//open a location without any information
@@ -181,6 +192,7 @@ export default function Map({ googleMapsApiKey }) {
 						<SearchResultMarker
 							key={`search-result-${index}`}
 							searchResult={searchResult}
+							focusOnPlace={focusOnPlace}
 						/>
 					))}
 					{locations.map((location, index) => (
