@@ -79,7 +79,7 @@ export default function ChatBox({
 			</div>
 			<div className={style["chat-container"]}>
 				{location?.messages?.map((message, index) => {
-					const sender = users.find((el) => el.id === message.sender);
+					const sender = message.sender.id ? message.sender : users.find((el) => el.id === message.sender);
 					const messageTime = new Date(message.created_at);
 					return (
 						<div
