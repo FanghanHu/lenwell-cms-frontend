@@ -2,7 +2,7 @@ import style from "./style.module.css";
 import Cross from "../icons/cross";
 import Image from "../icons/image";
 import Chat from "../icons/chat";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-nextjs-toast";
 import axios from "axios";
 import { useUser, useUsers } from "../../context/user-context";
@@ -15,10 +15,21 @@ export default function ChatBox({
 	updateLocation,
 }) {
 	const [input, setInput] = useState("");
-	const imageRef = useRef(null);
+	const imageInputRef = useRef(null);
+	const chatContainerRef = useRef(null);
 	const user = useUser();
 	const users = useUsers();
 	const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+	useEffect(() => {
+		//scroll chat to bottom whenever location changes or new messages are received
+		const container = chatContainerRef.current;
+		container.scrollTo({
+			top: container.scrollHeight,
+			left: 0,
+			behavior: 'smooth'
+		  });
+	}, [location])
 
 	function sendImage(e) {
 		//upload the image
@@ -77,7 +88,7 @@ export default function ChatBox({
 					? location["display_name"]
 					: location?.name}
 			</div>
-			<div className={style["chat-container"]}>
+			<div className={style["chat-container"]} ref={chatContainerRef}>
 				{location?.messages?.map((message, index) => {
 					const sender = message.sender.id ? message.sender : users.find((el) => el.id === message.sender);
 					const messageTime = new Date(message.created_at);
@@ -123,7 +134,7 @@ export default function ChatBox({
 				<div className="d-flex justify-content-end m-2">
 					<input
 						type="file"
-						ref={imageRef}
+						ref={imageInputRef}
 						accept="image/"
 						className="d-none"
 						onChange={sendImage}
@@ -131,7 +142,7 @@ export default function ChatBox({
 					<button
 						className="btn btn-warning mx-1 px-3"
 						onClick={() => {
-							imageRef.current.click();
+							imageInputRef.current.click();
 						}}
 					>
 						<Image />
