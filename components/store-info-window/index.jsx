@@ -18,6 +18,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 	const [sale, setSale] = useState();
 	const [partnered, setpartnered] = useState(false);
 	const saleList = useUsers();
+	const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 	useEffect(() => {
 		//update displayed information as location changes
@@ -63,10 +64,10 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 			sale: sale,
 			partnered: partnered,
 			lng: location.lng,
-			lat: location.lat
+			lat: location.lat,
 		}
 
-		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+		
 		if(updatedLocation.id === undefined) {
 			//new location
 			const res = await axios.post(`${BACKEND_URL}/locations`, updatedLocation);
@@ -91,8 +92,6 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 		toast.notify("Deleting...", {
 			title: "Please Wait",
 		});
-
-		const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 		await axios.delete(`${BACKEND_URL}/locations/${location.id}`);
 		deleteLocation(location);
 		setActiveLocation(null);
@@ -105,6 +104,31 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 	function handleChat() {
 		//toggle chat panel
 		setShowChatBox(true);
+	}
+
+	async function checkIn() {
+		//checkin without losing input
+		if(location.id) {
+			const now = new Date();
+			await axios.put(`${BACKEND_URL}/locations/${location.id}`, {
+				"last_visited_time": now
+			});
+			const updatedLocation = {
+				...location,
+				"last_visited_time": now.toISOString().split("T")[0]
+			}
+			updateLocation(updatedLocation);
+			setActiveLocation(updatedLocation);
+		
+			toast.notify("You have checked in", {
+				title: "Success",
+			});
+		} else {
+			console.error("You can not checkin a location that wasn't saved");
+			toast.notify("You can not checkin a location that wasn't saved", {
+				title: "Error",
+			});
+		}
 	}
 
 	//if the location belongs to the current user, or if it is free to take,
@@ -183,6 +207,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 					))}
 				</Form.Select>
 			</Form.Group>
+			
 			<div className="d-flex justify-content-end my-2">
 				<Form.Group>
 					<Form.Check
@@ -193,6 +218,13 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 						disabled={!editable}
 					/>
 				</Form.Group>
+			</div>
+			<div className="my-2">
+				<Form.Label>Last Check in: </Form.Label>
+				<div className="d-flex justify-content-between">
+					<div className="h5 text-muted">{location["last_visited_time"] ?? "Never"}</div>
+					<button className="btn btn-success btn-sm" disabled={location.id === undefined} onClick={checkIn}>Check in</button>
+				</div>
 			</div>
 			<div className="d-flex justify-content-end">
 				{location?.messages ? 
