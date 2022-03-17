@@ -174,6 +174,8 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 			onClick={stopPropagation}
 			onMouseDown={stopPropagation}
 			onDoubleClick={stopPropagation}
+			onTouchStart={stopPropagation}
+			onTouchEnd={stopPropagation}
 		>
 			<div className="d-flex justify-content-end m-1">
 				<CloseButton onClick={handleClose} />

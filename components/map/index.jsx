@@ -146,6 +146,7 @@ export default function Map({ googleMapsApiKey }) {
 	}
 
 	function onClick(event) {
+		console.log("event", event);
 		//console.log("event", event);
 		if (event.placeId) {
 			//clicking a POI, stop default fetching  of location detail.
