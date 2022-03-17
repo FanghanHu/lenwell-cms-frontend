@@ -239,7 +239,7 @@ export default function LocationInfoPanel({ location, setActiveLocation, updateL
 				>
 					<TruckIcon/>
 				</Button>
-				<Button variant="success" className="mx-1" onClick={handleSave}>
+				<Button variant="success" className="mx-1" onClick={handleSave} disabled={!editable}>
 					Save
 				</Button>
 				{
