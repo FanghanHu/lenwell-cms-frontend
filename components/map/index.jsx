@@ -1,15 +1,18 @@
 import { LoadScript, GoogleMap } from "@react-google-maps/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchBox from "../search-box";
 import SearchResultMarker from "../search-result-marker";
 import StoreMarker from "../store-marker";
 import MapContext from "../../context/map-context";
+import Filter from "../../components/icons/filter";
 import style from "./style.module.css";
 import axios from "axios";
 import StoreInfoWindow from "../store-info-window";
 import { useUser } from "../../context/user-context";
 import { useSocket } from "../../context/socket-context";
 import ChatBox from "../chat-box";
+import reactDom from "react-dom";
+import FilterBox from "../filter-box";
 
 const containerStyle = {
 	width: "100%",
@@ -27,10 +30,12 @@ export default function Map({ googleMapsApiKey }) {
 	const [zoom, setZoom] = useState(10);
 	const [bounds, setBounds] = useState(null);
 	const [searchResults, setSearchResults] = useState([]);
+	const [allLocations, setAllLocations] = useState([]);
 	const [locations, setLocations] = useState([]);
 	const [activeLocation, setActiveLocation] = useState(null);
 	const [placeService, setPlaceService] = useState(null);
 	const [showChatBox, setShowChatBox] = useState(false);
+	const [showFilterBox, setShowFilterBox] = useState(false);
 	const mapRef = useRef(null);
 	const user = useUser();
 	const socket = useSocket();
@@ -38,18 +43,20 @@ export default function Map({ googleMapsApiKey }) {
 	useEffect(() => {
 		function handleIncomingMessage(message) {
 			//append message to the location in the locations array
-			const location = locations.find(loc => loc.id === message.location.id);
-			if(location) {
+			const location = allLocations.find(
+				(loc) => loc.id === message.location.id
+			);
+			if (location) {
 				const newLocation = {
 					...location,
-					messages: [...(location.messages), message]
+					messages: [...location.messages, message],
 				};
 				updateLocation(newLocation);
 
 				console.log(message);
 
 				//also update the displayed active location if it this the one getting message
-				if(activeLocation?.id === newLocation.id) {
+				if (activeLocation?.id === newLocation.id) {
 					setActiveLocation(newLocation);
 				}
 			}
@@ -57,9 +64,9 @@ export default function Map({ googleMapsApiKey }) {
 		socket.on("message", handleIncomingMessage);
 
 		return () => {
-			socket.off("message", handleIncomingMessage)
+			socket.off("message", handleIncomingMessage);
 		};
-	}, [socket, locations, activeLocation])
+	}, [socket, allLocations, activeLocation]);
 
 	function handleZoomChange() {
 		setZoom(this.getZoom());
@@ -72,10 +79,26 @@ export default function Map({ googleMapsApiKey }) {
 	function handleLoad(map) {
 		mapRef.current = map;
 		setPlaceService(new google.maps.places.PlacesService(map));
+
+		//add a button to top right
+		const button = document.createElement("div");
+		reactDom.render(
+			<button
+				className="btn btn-warning text-white p-2"
+				style={{ margin: "10px" }}
+				onClick={() => {
+					setShowFilterBox(!showFilterBox);
+				}}
+			>
+				<Filter />
+			</button>,
+			button
+		);
+		map.controls[google.maps.ControlPosition.TOP_RIGHT].push(button);
 	}
 
 	function removeLocation(location) {
-		setLocations(locations.filter((el) => el !== location));
+		setAllLocations(allLocations.filter((el) => el !== location));
 	}
 
 	function updateLocation(location) {
@@ -84,19 +107,19 @@ export default function Map({ googleMapsApiKey }) {
 		}
 
 		//find the location with the same id and replace it
-		const newLocations = [...locations];
+		const newLocations = [...allLocations];
 		for (let i = 0; i < newLocations.length; i++) {
 			const el = newLocations[i];
 			if (el.id === location.id) {
 				newLocations[i] = location;
-				setLocations(newLocations);
+				setAllLocations(newLocations);
 				return;
 			}
 		}
 
 		//add the location to the new array if no same id was found
 		newLocations.push(location);
-		setLocations(newLocations);
+		setAllLocations(newLocations);
 	}
 
 	/**
@@ -166,27 +189,35 @@ export default function Map({ googleMapsApiKey }) {
 			temp.push.apply(temp, res.data);
 		} while (res.data.length === 100);
 
-		setLocations(temp);
+		setAllLocations(temp);
 	}, []);
 
 	return (
 		<LoadScript googleMapsApiKey={googleMapsApiKey} libraries={libraries}>
-			<ChatBox
-				isActive={showChatBox}
-				setShowChatBox={setShowChatBox}
-				location={activeLocation}
-				updateLocation={updateLocation}
-			/>
-			<GoogleMap
-				mapContainerStyle={containerStyle}
-				center={center}
-				zoom={zoom}
-				onZoomChanged={handleZoomChange}
-				onBoundsChanged={handleBoundsChanged}
-				onLoad={handleLoad}
-				onClick={onClick}
-			>
-				<MapContext map={mapRef.current}>
+			<MapContext map={mapRef.current}>
+				<ChatBox
+					isActive={showChatBox}
+					setShowChatBox={setShowChatBox}
+					location={activeLocation}
+					updateLocation={updateLocation}
+				/>
+				<FilterBox
+					show={showFilterBox}
+					setShow={setShowFilterBox}
+					setLocations={setLocations}
+					allLocations={allLocations}
+					locations={locations}
+					setActiveLocation={setActiveLocation}
+				/>
+				<GoogleMap
+					mapContainerStyle={containerStyle}
+					center={center}
+					zoom={zoom}
+					onZoomChanged={handleZoomChange}
+					onBoundsChanged={handleBoundsChanged}
+					onLoad={handleLoad}
+					onClick={onClick}
+				>
 					<SearchBox onPlacesChanged={setSearchResults} bounds={bounds} />
 					{searchResults.map((searchResult, index) => (
 						<SearchResultMarker
@@ -210,8 +241,8 @@ export default function Map({ googleMapsApiKey }) {
 						deleteLocation={removeLocation}
 						setShowChatBox={setShowChatBox}
 					/>
-				</MapContext>
-			</GoogleMap>
+				</GoogleMap>
+			</MapContext>
 		</LoadScript>
 	);
 }
