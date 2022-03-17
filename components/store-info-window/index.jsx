@@ -161,7 +161,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 	//or the current user is an admin then it is editable
 	const user = useUser();
 	const editable =
-		user.isAdmin || !location.sale || user.id === location.sale?.id;
+		user.isAdmin || !location?.sale || user.id === location?.sale?.id;
 
 	return (
 		location ? <OverlayView

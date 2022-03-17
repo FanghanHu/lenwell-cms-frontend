@@ -27,10 +27,6 @@ const center = {
 const libraries = ["places"];
 
 export default function Map({ googleMapsApiKey }) {
-
-	console.log("API KEY", googleMapsApiKey);
-
-
 	const [zoom, setZoom] = useState(10);
 	const [bounds, setBounds] = useState(null);
 	const [searchResults, setSearchResults] = useState([]);
