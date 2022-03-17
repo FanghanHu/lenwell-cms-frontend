@@ -106,26 +106,52 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 		setShowChatBox(true);
 	}
 
-	async function checkIn() {
+	function checkIn() {
+		//this is about 1 mile
+		const allowedDistance = 0.014;
+
 		//checkin without losing input
-		if(location.id) {
-			const now = new Date();
-			await axios.put(`${BACKEND_URL}/locations/${location.id}`, {
-				"last_visited_time": now
-			});
-			const updatedLocation = {
-				...location,
-				"last_visited_time": now.toISOString().split("T")[0]
-			}
-			updateLocation(updatedLocation);
-			setActiveLocation(updatedLocation);
-		
-			toast.notify("You have checked in", {
-				title: "Success",
-			});
+		if("geolocation" in navigator) {
+			navigator.geolocation.getCurrentPosition(async position => {
+				const distance = Math.sqrt(Math.pow(Math.abs(position.coords.latitude - location.lat), 2)
+				 + Math.pow(Math.abs(position.coords.longitude - location.lng), 2)) * 69;
+				const maxDistance = 2;
+				 if(distance < maxDistance) {
+					 //only attempt to check in if distance is less than 2 miles
+					if(location.id) {
+						const now = new Date().toISOString().split("T")[0];
+						await axios.put(`${BACKEND_URL}/locations/${location.id}`, {
+							"last_visited_time": now
+						});
+						const updatedLocation = {
+							...location,
+							"last_visited_time": now
+						}
+						updateLocation(updatedLocation);
+						setActiveLocation(updatedLocation);
+					
+						toast.notify("You have checked in", {
+							title: "Success",
+						});
+					} else {
+						console.error("You can not checkin a location that wasn't saved");
+						toast.notify("You can not checkin a location that wasn't saved", {
+							title: "Error",
+						});
+					}
+				 } else {
+					toast.notify(`You are about ${distance.toFixed(2)} miles away from this location, You must be within ${maxDistance} miles to check in.`, {
+						title: "You are too far",
+					});
+				 }
+			}, error => {
+				toast.notify("Failed to get geolocation, please check permission.\n" + error, {
+					title: "Error",
+				});
+			})
+			
 		} else {
-			console.error("You can not checkin a location that wasn't saved");
-			toast.notify("You can not checkin a location that wasn't saved", {
+			toast.notify("You must enable location service in order to check in", {
 				title: "Error",
 			});
 		}
@@ -222,7 +248,7 @@ export default function StoreInfoWindow({ location, setActiveLocation, updateLoc
 			<div className="my-2">
 				<Form.Label>Last Check in: </Form.Label>
 				<div className="d-flex justify-content-between">
-					<div className="h5 text-muted">{location["last_visited_time"] ?? "Never"}</div>
+					<div className="h5 text-muted">{location["last_visited_time"]?.split("T")[0] ?? "Never"}</div>
 					<button className="btn btn-success btn-sm" disabled={location.id === undefined} onClick={checkIn}>Check in</button>
 				</div>
 			</div>
