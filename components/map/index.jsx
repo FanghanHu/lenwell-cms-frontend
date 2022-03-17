@@ -13,6 +13,8 @@ import { useSocket } from "../../context/socket-context";
 import ChatBox from "../chat-box";
 import reactDom from "react-dom";
 import FilterBox from "../filter-box";
+import Cross from "../icons/cross";
+import LocationInfoPanel from "../location-info-panel";
 
 const containerStyle = {
 	width: "100%",
@@ -196,6 +198,15 @@ export default function Map({ googleMapsApiKey }) {
 	return (
 		<LoadScript googleMapsApiKey={googleMapsApiKey} libraries={libraries}>
 			<MapContext map={mapRef.current}>
+				<div className={`${style["mobile-location-info"]} ${activeLocation ? style.active : ""}`}>
+					<LocationInfoPanel
+						updateLocation={updateLocation}
+						location={activeLocation}
+						setActiveLocation={setActiveLocation}
+						deleteLocation={removeLocation}
+						setShowChatBox={setShowChatBox}
+					/>
+				</div>
 				<ChatBox
 					isActive={showChatBox}
 					setShowChatBox={setShowChatBox}
@@ -218,6 +229,9 @@ export default function Map({ googleMapsApiKey }) {
 					onBoundsChanged={handleBoundsChanged}
 					onLoad={handleLoad}
 					onClick={onClick}
+					option={{
+						gestureHandling: "greedy"
+					}}
 				>
 					<SearchBox onPlacesChanged={setSearchResults} bounds={bounds} />
 					{searchResults.map((searchResult, index) => (

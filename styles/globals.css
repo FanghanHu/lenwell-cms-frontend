@@ -11,6 +11,10 @@ a {
   text-decoration: none;
 }
 
+#toast-container {
+  z-index: 999;
+}
+
 * {
   box-sizing: border-box;
 }

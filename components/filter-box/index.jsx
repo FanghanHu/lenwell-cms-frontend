@@ -115,6 +115,7 @@ export default function FilterBox({setLocations, allLocations, locations, show, 
                 <button className="btn btn-sm btn-warning float-end my-2" onClick={() => {
                     setSale(null);
                     setVisitedWithin("");
+                    setNotVisitedWithin("");
                     setNameQuery("");
                 }}>
                     Clear Filter
@@ -132,6 +133,7 @@ export default function FilterBox({setLocations, allLocations, locations, show, 
                                 lng: location.lng + 0.02,
                             }));
                             setActiveLocation(location);
+                            setShow(false);
                         }}>
                             {location?.["display_name"]?.trim().length > 0 ? location["display_name"] : (location.name ?? "unnamed")}
                         </button>
